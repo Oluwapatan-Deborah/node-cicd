@@ -1,0 +1,16 @@
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          user: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull debbydebby-demo:latest
+            docker stop node-app || true
+            docker rm node-app || true
+            docker run -d -p 3000:3000 --name node-app debbydebby-cicd-demo:latest
